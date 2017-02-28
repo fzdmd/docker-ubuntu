@@ -1,4 +1,6 @@
 FROM ubuntu:14.04
+
+
 RUN apt-get update && apt-get -y upgrade
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install \
   apache2 libapache2-mod-php5 php5-mysql php5-gd php5-mcrypt php-pear php-apc php5-curl curl lynx-cur
@@ -24,5 +26,22 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 
 RUN chown -R www-data:www-data /var/www/html && chown -R www-data:www-data /var/lib/php5
 
+ENV MYSQL_USER=mysql \
+    MYSQL_DATA_DIR=/var/lib/mysql \
+    MYSQL_RUN_DIR=/run/mysqld \
+    MYSQL_LOG_DIR=/var/log/mysql
+
+
+COPY entrypoint.sh /sbin/entrypoint.sh
+
+RUN chmod 755 /sbin/entrypoint.sh
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server \
+ && rm -rf ${MYSQL_DATA_DIR} \
+ && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 3306/tcp
 EXPOSE 80
-CMD /usr/sbin/apache2ctl -D FOREGROUND
+
+VOLUME ["${MYSQL_DATA_DIR}", "${MYSQL_RUN_DIR}"]
+CMD ["/usr/bin/mysqld_safe", "/usr/sbin/apache2ctl -D FOREGROUND"]
