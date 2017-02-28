@@ -44,4 +44,5 @@ EXPOSE 3306/tcp
 EXPOSE 80
 
 VOLUME ["${MYSQL_DATA_DIR}", "${MYSQL_RUN_DIR}"]
-CMD ["/usr/bin/mysqld_safe", "/usr/sbin/apache2ctl -D FOREGROUND"]
+CMD /usr/bin/mysqld_safe
+CMD /usr/sbin/apache2ctl -D FOREGROUND
